@@ -1,7 +1,8 @@
-/*
- * Главный файл стилей.
- * Все паршалы подключаются сюда.
- */
+@import './vars';
 
-// Стили для файла с примером HTML-фрагмента
-@import './example';
+@import './glob';
+
+@import './btn';
+@import './header';
+@import './form';
+@import './gallery';

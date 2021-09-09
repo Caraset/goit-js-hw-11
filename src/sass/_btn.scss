@@ -1,0 +1,32 @@
+.button {
+  padding: 4px 10px;
+
+  border: 1px solid var(--fourth-color);
+  border-radius: 5px;
+  background-color: var(--third-color);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--main-white);
+  }
+}
+
+.input-btn {
+  margin-left: 15px;
+}
+
+.load-more {
+  margin-top: 20px;
+}
+
+.clear-btn {
+  margin-left: 10px;
+}
+
+.visually-hidden {
+  position: absolute;
+  clip: rect(0 0 0 0);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+}
