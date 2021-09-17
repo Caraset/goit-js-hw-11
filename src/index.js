@@ -1,9 +1,13 @@
 import { Notify } from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
+import getRefs from './js/getRefs';
+import imgCard from './templates/img-card.hbs';
 
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import './sass/main.scss';
 const axios = require('axios').default;
+
+const refs = getRefs();
 
 const URL = 'https://pixabay.com/api/';
 const searchOption = {
@@ -16,16 +20,6 @@ const searchOption = {
     per_page: 40,
     page: 0,
   },
-};
-
-const refs = {
-  form: document.querySelector('#search-form'),
-  input: document.querySelector('.search-form__input'),
-  btn: document.querySelector('.search-form__button'),
-  loadMoreBtn: document.querySelector('.load-more'),
-  clearBtn: document.querySelector('.clear-btn'),
-  gallery: document.querySelector('.gallery'),
-  card: document.querySelector('.photo-card'),
 };
 
 refs.form.addEventListener('submit', onFormSubmit);
@@ -43,15 +37,28 @@ function onCardClick(evt) {
   gallery.open('.gallery');
 }
 
-function onFormSubmit(e) {
+// function onFormSubmit(e) {
+//   e.preventDefault();
+//   searchOption.params.page = 0;
+
+//   getColection(e.currentTarget.searchQuery.value)
+//     .then(onSucces)
+//     .catch(() =>
+//       Notify.failure('Sorry, there are no images matching your search query. Please try again.'),
+//     );
+
+//   refs.form.reset();
+// }
+
+async function onFormSubmit(e) {
   e.preventDefault();
   searchOption.params.page = 0;
-
-  getColection(e.currentTarget.searchQuery.value)
-    .then(onSucces)
-    .catch(() =>
-      Notify.failure('Sorry, there are no images matching your search query. Please try again.'),
-    );
+  try {
+    const collection = await getColection(e.currentTarget.searchQuery.value);
+    onSucces(collection);
+  } catch {
+    Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+  }
 
   refs.form.reset();
 }
@@ -86,25 +93,36 @@ async function getColection(query = searchOption.params.q) {
   return respons;
 }
 
-function loadMore() {
-  getColection()
-    .then(resp => {
-      makeMarkUp(resp);
-      gallery.refresh();
-      smoothScroll();
-    })
-    .catch(() => {
-      Notify.failure("We're sorry, but you've reached the end of search results.");
-      refs.loadMoreBtn.classList.add('visually-hidden');
-    });
+// function loadMore() {
+//   getColection()
+//     .then(resp => {
+//       makeMarkUp(resp);
+//       gallery.refresh();
+//       smoothScroll();
+//     })
+//     .catch(() => {
+//       Notify.failure("We're sorry, but you've reached the end of search results.");
+//       refs.loadMoreBtn.classList.add('visually-hidden');
+//     });
+// }
+
+async function loadMore() {
+  try {
+    const collection = await getColection();
+
+    makeMarkUp(collection);
+    gallery.refresh();
+    smoothScroll();
+  } catch {
+    Notify.failure("We're sorry, but you've reached the end of search results.");
+    refs.loadMoreBtn.classList.add('visually-hidden');
+  }
 }
 
 function smoothScroll() {
   const { height: cardHeight } = document
     .querySelector('.gallery')
     .firstElementChild.getBoundingClientRect();
-
-  console.log(cardHeight);
 
   window.scrollBy({
     top: cardHeight * 2 + 180,
@@ -113,33 +131,33 @@ function smoothScroll() {
 }
 
 function makeMarkUp({ data }) {
-  const a = data.hits.map(el => makeCard(el)).join('');
+  const items = data.hits.map(imgCard).join('');
 
-  refs.gallery.insertAdjacentHTML('beforeend', a);
+  refs.gallery.insertAdjacentHTML('beforeend', items);
 
   refs.loadMoreBtn.classList.remove('visually-hidden');
 }
 
-function makeCard({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) {
-  return `<a href="${largeImageURL}" class="photo-card" >
-  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
-  <div class="info">
-    <p class="info-item">
-      <b>Likes</b>
-      ${likes}
-    </p>
-    <p class="info-item">
-      <b>Views</b>
-      ${views}
-    </p>
-    <p class="info-item">
-      <b>Comments</b>
-      ${comments}
-    </p>
-    <p class="info-item">
-      <b>Downloads</b>
-      ${downloads}
-    </p>
-  </div>
-</a>`;
-}
+// function makeCard({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) {
+//   return `<a href="${largeImageURL}" class="photo-card" >
+//   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+//   <div class="info">
+//     <p class="info-item">
+//       <b>Likes</b>
+//       ${likes}
+//     </p>
+//     <p class="info-item">
+//       <b>Views</b>
+//       ${views}
+//     </p>
+//     <p class="info-item">
+//       <b>Comments</b>
+//       ${comments}
+//     </p>
+//     <p class="info-item">
+//       <b>Downloads</b>
+//       ${downloads}
+//     </p>
+//   </div>
+// </a>`;
+// }
